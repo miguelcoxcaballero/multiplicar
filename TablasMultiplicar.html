@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Test de Tablas de Multiplicar</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Montserrat', sans-serif;
+      background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    header {
+      width: 100%;
+      padding: 1rem 0;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.8);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+      color: #333;
+    }
+    /* Contenedor principal para centrar verticalmente el test */
+    .main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .container {
+      background: #fff;
+      border-radius: 12px;
+      padding: 3rem 2rem;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      text-align: center;
+      width: 90%;
+      max-width: 400px;
+    }
+    .question {
+      font-size: 3rem;
+      font-weight: 700;
+      color: #444;
+      margin-bottom: 2rem;
+    }
+    .options {
+      display: grid;
+      grid-template-columns: repeat(2, auto);
+      gap: 1rem; /* Espacio igual entre filas y columnas */
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+    .option-btn {
+      width: 100px;
+      height: 100px;
+      font-size: 1.5rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s ease;
+      background: #f0f0f0;
+      color: #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .option-btn:hover {
+      background: #e0e0e0;
+      transform: scale(1.03);
+    }
+    .correct {
+      background: #4caf50 !important;
+      color: #fff;
+    }
+    .incorrect {
+      background: #f44336 !important;
+      color: #fff;
+    }
+    /* Espacio fijo para el feedback y el botón (para que no cambie el tamaño del contenedor) */
+    .feedback-container {
+      min-height: 2rem;
+      margin-bottom: 1rem;
+    }
+    .feedback {
+      font-size: 1.2rem;
+      color: #555;
+    }
+    .next-btn {
+      padding: 0.8rem 1.4rem;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 8px;
+      background: #1976d2;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      /* Espacio reservado: siempre ocupa el mismo lugar */
+      opacity: 0;
+      pointer-events: none;
+    }
+    .next-btn.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .next-btn:hover {
+      background: #1565c0;
+    }
+    /* Animación de parpadeo en naranja */
+    @keyframes blink {
+      0% { background-color: #ffa726; }
+      50% { background-color: #ff9800; }
+      100% { background-color: #ffa726; }
+    }
+    .hint {
+      animation: blink 1s infinite;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Tablas de Multiplicar</h1>
+  </header>
+  <div class="main">
+    <div class="container">
+      <div class="question" id="question"></div>
+      <div class="options" id="options"></div>
+      <div class="feedback-container">
+        <div class="feedback" id="feedback"></div>
+      </div>
+      <button class="next-btn" id="nextBtn">Siguiente</button>
+    </div>
+  </div>
+
+  <script>
+    const questionEl = document.getElementById('question');
+    const optionsEl = document.getElementById('options');
+    const feedbackEl = document.getElementById('feedback');
+    const nextBtn = document.getElementById('nextBtn');
+
+    let currentQuestion = null; // Almacena num1, num2 y la respuesta correcta
+    let repeatQuestion = false; // Indica si se debe repetir la misma pregunta
+    let hintTimeout; // Controla el temporizador de pista
+
+    function generateQuestion() {
+      // Cancelar temporizador previo y quitar posibles pistas
+      clearTimeout(hintTimeout);
+      feedbackEl.textContent = '';
+      nextBtn.classList.remove('visible');
+      optionsEl.innerHTML = '';
+
+      // Si no se va a repetir la pregunta (por fallo o por agotar tiempo), generamos una nueva
+      if (!repeatQuestion) {
+        const num1 = Math.floor(Math.random() * 9) + 1;
+        const num2 = Math.floor(Math.random() * 9) + 1;
+        currentQuestion = {
+          num1: num1,
+          num2: num2,
+          correctAnswer: num1 * num2
+        };
+      }
+      repeatQuestion = false; // Restablecer flag
+      questionEl.textContent = `${currentQuestion.num1} x ${currentQuestion.num2} = ?`;
+
+      // Generar opciones: la respuesta correcta + 3 distractores
+      let optionsSet = new Set();
+      optionsSet.add(currentQuestion.correctAnswer);
+      while (optionsSet.size < 4) {
+        const factor = Math.floor(Math.random() * 9) + 1;
+        const wrong = currentQuestion.num1 * factor;
+        if (wrong !== currentQuestion.correctAnswer) {
+          optionsSet.add(wrong);
+        }
+      }
+      let options = Array.from(optionsSet);
+      options.sort(() => Math.random() - 0.5);
+
+      // Crear botones para cada opción
+      options.forEach(option => {
+        const btn = document.createElement('button');
+        btn.textContent = option;
+        btn.className = 'option-btn';
+        btn.addEventListener('click', () => checkAnswer(option, btn));
+        optionsEl.appendChild(btn);
+      });
+
+      // Si pasan 3 segundos sin respuesta, se activa la pista y se repite la pregunta
+      hintTimeout = setTimeout(() => {
+        document.querySelectorAll('.option-btn').forEach(button => {
+          if (Number(button.textContent) === currentQuestion.correctAnswer) {
+            button.classList.add('hint');
+          }
+        });
+        repeatQuestion = true; // Se mantiene la misma pregunta la próxima vez
+      }, 3000);
+    }
+
+    function checkAnswer(selected, btn) {
+      // Detener el temporizador de la pista
+      clearTimeout(hintTimeout);
+      const buttons = document.querySelectorAll('.option-btn');
+      buttons.forEach(b => {
+        b.classList.remove('hint');
+        b.disabled = true;
+      });
+
+      if (selected === currentQuestion.correctAnswer) {
+        // Respuesta correcta
+        btn.classList.add('correct');
+        feedbackEl.textContent = '¡Correcto!';
+      } else {
+        // Respuesta incorrecta, se repite la misma pregunta en la próxima
+        repeatQuestion = true;
+        btn.classList.add('incorrect');
+        feedbackEl.textContent = `Incorrecto, la respuesta es ${currentQuestion.correctAnswer}.`;
+        buttons.forEach(b => {
+          if (Number(b.textContent) === currentQuestion.correctAnswer) {
+            b.classList.add('correct');
+          }
+        });
+      }
+      nextBtn.classList.add('visible');
+    }
+
+    nextBtn.addEventListener('click', generateQuestion);
+
+    // Comenzar con la primera pregunta
+    generateQuestion();
+  </script>
+</body>
+</html>
