@@ -1,6 +1,7 @@
-# multiplicar
-Web interactiva para practicar el cálculo mental con mutiplicaciones simples, desarrollado con HTML, CSS y JavaScript. Genera preguntas de multiplicación aleatorias y ofrece respuestas de opción múltiple con retroalimentación inmediata.
+# Multiplicar
+Web interactiva para practicar el cálculo mental con multiplicaciones simples, desarrollado con HTML, CSS y JavaScript. Genera preguntas de multiplicación aleatorias y ofrece respuestas de opción múltiple con retroalimentación inmediata.
 
+![Multiplicar](image.png)
 
 ### Características
 
@@ -43,4 +44,4 @@ Web interactiva para practicar el cálculo mental con mutiplicaciones simples, d
 
 ### Probar el código
 
-Simplemente descargar el archivo HTML y ejecutar. Se puede abrir con cualquier navegador, como Chrome.
+Simplemente descarga el archivo HTML y ejecútalo. Se puede abrir con cualquier navegador, como Chrome.
